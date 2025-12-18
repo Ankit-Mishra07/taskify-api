@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
-const subtaskSchema = require('./subtask.model');
+const {subtaskSchema} = require('./subtask.model');
 const { workLogSchema } = require('./worklog.model');
 
 const taskSchema = new mongoose.Schema({
+    taskType: {type:String, required:false, default: 'ParentTask'},
     taskId: {type:String, required:true, unique: true},
     projectName: {type: String, required: true},
     workType: {type: String, required: true},

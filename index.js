@@ -5,6 +5,7 @@ const connectDB = require('./src/config/db');
 const userRouter = require('./src/routes/user.route');
 const taskRouter = require('./src/routes/task.route');
 const worklogRouter = require('./src/routes/worklog.route');
+const subtaskRouter = require('./src/routes/subtask.route');
 const app = express();
 
 app.use(express.json());
@@ -18,6 +19,7 @@ dotenv.config({
 app.use('/api/user', userRouter);
 app.use('/api/task', taskRouter);
 app.use('/api/worklog', worklogRouter);
+app.use('/api/task/subtask', subtaskRouter);
 
 const port = process.env.PORT || 3000;
 app.listen(port, async () => {

@@ -24,7 +24,7 @@ const createTask = async (req, res) => {
         });
         const getTask = await TaskSchema.find({taskId: uniqueTaskId}).populate(["assignedTo", "reporter", "createdBy"], ['-password', '-createdAt', '-updatedAt']);
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true, message: 'Task Created Successfully', 
             data: getTask
         })
@@ -62,7 +62,7 @@ updateTask = async (req, res) => {
 const getAllTasksList = async (req, res) => {
     try {
         const tasks = await TaskSchema.find().populate(["assignedTo", "reporter", "createdBy"], ['-password', '-createdAt', '-updatedAt'])
-        res.status(200).json({
+        return res.status(200).json({
             success: true, message: 'Task Fetched Successfully', 
             data: tasks
         })
@@ -74,4 +74,33 @@ const getAllTasksList = async (req, res) => {
     }
 }
 
-module.exports = {createTask, getAllTasksList, updateTask};
+const getOneTask = async (req, res) => {
+    try {
+        const tasks = await TaskSchema.findById(req.params.id).populate(["assignedTo", "reporter", "createdBy"], ['-password', '-createdAt', '-updatedAt'])
+        return res.status(200).json({
+            success: true, message: 'Task Fetched Successfully', 
+            data: tasks
+        })
+    }catch(error) {
+        return res.status(500).json({
+            success: false, message: 'Something went wrong',
+            errorMessage: error,
+        })        
+    }
+}
+
+const deleteOneTask = async (req, res) => {
+    try {
+        await TaskSchema.findByIdAndDelete(req.params.id);
+        return res.status(200).json({
+            success: true, message: 'Task Updated Successfully', 
+        })
+    }catch(error) {
+        return res.status(500).json({
+            success: false, message: 'Something went wrong',
+            errorMessage: error,
+        })        
+    }
+}
+
+module.exports = {createTask, getAllTasksList, updateTask, getOneTask, deleteOneTask};
