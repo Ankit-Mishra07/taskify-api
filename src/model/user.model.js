@@ -5,7 +5,8 @@ const userSchema = new mongoose.Schema({
     email: {type: String, required: true, unique: true},
     password: {type:String, required: true},
     isAdmin: {type: Boolean, required: false, default:false},
-    isSuperAdmin: {type: Boolean, required: false, default:false}
+    isSuperAdmin: {type: Boolean, required: false, default:false},
+    employee_id: {type: Number, required: true, unique: true},
 }
 ,{
     timestamps:true,

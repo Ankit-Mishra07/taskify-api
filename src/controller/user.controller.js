@@ -27,7 +27,8 @@ const createUser = async (req, res) => {
             email: req.body.email,
             password: req.body.password,
             isAdmin: req.body.isAdmin,
-            isSuperAdmin: req.body.isSuperAdmin
+            isSuperAdmin: req.body.isSuperAdmin,
+            employee_id: req.body.employee_id
         })
         return res.status(200).json({
             success:true, message: 'User created successfully',
@@ -74,9 +75,9 @@ const getAllUserList = async (req, res) => {
 const loginUser = async (req, res) => {
     try {
 
-        const user = await UserSchema.find({email: req.body.email, password: req.body.password});
-        if(!user || !user.length) {
-            return res.status(400).json({
+        const user = await UserSchema.findOne({email: req.body.email, password: req.body.password}).select('-password');
+        if(!user) {
+            return res.status(200).json({
                 success:false,
                 message:'User not found, please contact admin',
             });
@@ -86,11 +87,13 @@ const loginUser = async (req, res) => {
             name:user.userName,
             email:user.email,
             isAdmin: user.isAdmin,
+            isSuperAdmin:user.isSuperAdmin,
+            employee_id: user.employee_id
         }, 'secret', {
             expiresIn: "1000h"
         });
         return res.status(200).json({
-            success:false, message: 'Logged In Successfully',
+            success:true, message: 'Logged In Successfully',
             data: {user: user, token: token}
         });
 

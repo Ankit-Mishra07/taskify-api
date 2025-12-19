@@ -6,6 +6,7 @@ const userRouter = require('./src/routes/user.route');
 const taskRouter = require('./src/routes/task.route');
 const worklogRouter = require('./src/routes/worklog.route');
 const subtaskRouter = require('./src/routes/subtask.route');
+const statusRouter = require('./src/routes/status.route')
 const app = express();
 
 app.use(express.json());
@@ -20,6 +21,7 @@ app.use('/api/user', userRouter);
 app.use('/api/task', taskRouter);
 app.use('/api/worklog', worklogRouter);
 app.use('/api/task/subtask', subtaskRouter);
+app.use('/api/status', statusRouter);
 
 const port = process.env.PORT || 3000;
 app.listen(port, async () => {

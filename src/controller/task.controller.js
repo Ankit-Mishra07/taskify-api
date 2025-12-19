@@ -74,6 +74,21 @@ const getAllTasksList = async (req, res) => {
     }
 }
 
+const getSingleUserTaskLists = async (req, res) => {
+    try {
+        const tasks = await TaskSchema.find({assignedTo: req.params.userId}).populate(["assignedTo", "reporter", "createdBy"], ['-password', '-createdAt', '-updatedAt'])
+        return res.status(200).json({
+            success: true, message: 'Task Fetched Successfully', 
+            data: tasks
+        })
+    }catch(error) {
+        return res.status(500).json({
+            success: false, message: 'Something went wrong',
+            errorMessage: error,
+        })     
+    }
+}
+
 const getOneTask = async (req, res) => {
     try {
         const tasks = await TaskSchema.findById(req.params.id).populate(["assignedTo", "reporter", "createdBy"], ['-password', '-createdAt', '-updatedAt'])
@@ -103,4 +118,4 @@ const deleteOneTask = async (req, res) => {
     }
 }
 
-module.exports = {createTask, getAllTasksList, updateTask, getOneTask, deleteOneTask};
+module.exports = {createTask, getAllTasksList, updateTask, getOneTask, deleteOneTask, getSingleUserTaskLists};
