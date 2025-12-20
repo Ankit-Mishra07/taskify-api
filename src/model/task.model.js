@@ -4,12 +4,12 @@ const { workLogSchema } = require('./worklog.model');
 
 const taskSchema = new mongoose.Schema({
     taskType: {type:String, required:false, default: 'ParentTask'},
-    taskId: {type:String, required:true, unique: true},
+    taskUniqueId: {type:String, required:true, unique: true},
     projectName: {type: String, required: true},
     workType: {type: String, required: true},
     status: {type: String, required: true, default:'Todo'},
     summary: {type:String, required: true},
-    description: {type: String, required: true},
+    description: {type: String, required: false},
     createdBy: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},
     priority: {type: String, required: false, default: 'Medium'},
     startDate: {type: String, required: false},

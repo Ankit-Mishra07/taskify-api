@@ -3,6 +3,7 @@ const { workLogSchema } = require('./worklog.model');
 
 const subtaskSchema = new mongoose.Schema({
     taskType: {type:String, required:false, default: 'SubTask'},
+    taskUniqueId: {type:String, required:true, unique: true},
     projectName: {type: String, required: true},
     workType: {type: String, required: true},
     status: {type: String, required: true, default:'Todo'},

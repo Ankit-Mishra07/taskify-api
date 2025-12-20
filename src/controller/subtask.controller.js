@@ -1,5 +1,6 @@
 const { SubTaskSchema } = require("../model/subtask.model");
 const TaskSchema = require("../model/task.model");
+const { generateUUIDId } = require("../utils/common");
 
 const createSubtask = async (req, res) => {
     try {
@@ -7,6 +8,7 @@ const createSubtask = async (req, res) => {
         console.log(parentTask)
         if(parentTask) {
             const subtaskCreate = await SubTaskSchema.create({
+                taskUniqueId: generateUUIDId(),
                 projectName: req.body.projectName,
                 workType: req.body.workType,
                 status: req.body.status || 'Todo',

@@ -1,11 +1,11 @@
+const { SubTaskSchema } = require("../model/subtask.model");
 const TaskSchema = require("../model/task.model")
-const uuid = require('uuid');
+const { combineSubtaskToTask, generateUUIDId } = require("../utils/common");
 
 const createTask = async (req, res) => {
     try {
-        const uniqueTaskId = uuid.v4();
         const task = await TaskSchema.create({
-                taskId: uniqueTaskId,
+                taskUniqueId: generateUUIDId(),
                 projectName: req.body.projectName,
                 workType: req.body.workType,
                 status: req.body.status || 'Todo',
@@ -22,7 +22,7 @@ const createTask = async (req, res) => {
                 subTasks: [],
                 workLogs: [],
         });
-        const getTask = await TaskSchema.find({taskId: uniqueTaskId}).populate(["assignedTo", "reporter", "createdBy"], ['-password', '-createdAt', '-updatedAt']);
+        const getTask = await TaskSchema.findById(task._id).populate(["assignedTo", "reporter", "createdBy"], ['-password', '-createdAt', '-updatedAt']);
 
         return res.status(200).json({
             success: true, message: 'Task Created Successfully', 
@@ -118,4 +118,49 @@ const deleteOneTask = async (req, res) => {
     }
 }
 
-module.exports = {createTask, getAllTasksList, updateTask, getOneTask, deleteOneTask, getSingleUserTaskLists};
+const getAllTask_SubTaskList = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        const search = req.query.search;
+        const { page: p, limit: l, search: s, ...filters } = req.query;
+        const query = {};
+
+        if (search) {
+            query.$or = [
+                { summary: { $regex: search, $options: 'i' } },
+            ];
+        }
+
+        if(filters.assignedTo) {
+            query.assignedTo = {$in : filters.assignedTo.split(',').map(d => d.trim())};
+        }
+        if(filters.workType) {
+            query.workType = {$in : filters.workType.split(',').map(d => d.trim())};
+        }
+        if(filters.status) {
+            query.status = {$in : filters.status.split(',').map(d => d.trim())};
+        }
+        if(filters.projectName) {
+            query.projectName = {$in : filters.projectName.split(',').map(d => d.trim())};
+        }
+
+        let taskList = await TaskSchema.find(query);
+        let subTaskList = await SubTaskSchema.find(query);
+        let list = taskList.concat(subTaskList).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        return res.status(200).json({
+            success: true, message: 'Task fetched Successfully',
+            data: list
+        })
+
+    }catch(error) {
+        return res.status(500).json({
+            success: false, message: 'Something went wrong',
+            errorMessage: error,
+        })         
+    }
+}
+
+module.exports = {createTask, getAllTasksList, updateTask, getOneTask, deleteOneTask, getSingleUserTaskLists, getAllTask_SubTaskList};

@@ -1,3 +1,5 @@
+const { v4: uuidv4 } = require('uuid');
+
 const isValidDate = (date) => {
     if(!date && new Date(date) == 'Invalid Date') {
         return false;
@@ -26,5 +28,18 @@ const convertLogTime = (time) => {
         return logTimeInSeconds;
     }
 }
+const combineSubtaskToTask = (tasklist) => {
+    let list = [];
+    for(let task of tasklist) {
+      list.push(task);
+      task.subTasks.forEach(el => {
+        list.push(el);
+      })
+    }
+    return list;
+  }
 
-module.exports = {isValidDate}
+function generateUUIDId() {
+  return `IDS-${uuidv4().split('-')[0].toUpperCase()}`;
+}
+module.exports = {isValidDate, combineSubtaskToTask, generateUUIDId}
