@@ -46,16 +46,18 @@ const updateSubtask = async (req, res) => {
     try {
         const subtaskUpdate = await SubTaskSchema.findByIdAndUpdate(req.params.subtaskId, req.body, {new:true, runValidators:true});
         const parentTask = await TaskSchema.findById(subtaskUpdate.taskId);
-        console.log(subtaskUpdate);
-        console.log('-------------------');
-        console.log(parentTask);
-    
-        parentTask.subTasks.forEach(v => {
-            if(v._id == subtaskUpdate._id) {
-                v = {...subtaskUpdate};
-            }
-        });
-        await TaskSchema.findByIdAndUpdate(subtaskUpdate.taskId, parentTask, {new: true, runValidators:true});
+        // console.log(subtaskUpdate);
+        // console.log('-------------------');
+        
+        parentTask.subTasks = parentTask.subTasks.map(subtask =>
+            subtask._id.toString() === subtaskUpdate._id.toString()
+            ? subtaskUpdate : subtask
+            );
+        let UpdatedsubtaskValue = {
+            "subTasks": parentTask.subTasks
+        }
+        await TaskSchema.findByIdAndUpdate(subtaskUpdate.taskId, UpdatedsubtaskValue, {new: true, runValidators:true});
+
         return res.status(200).json({
             success:true, message: 'Subtask updated succussfully',
             data: subtaskUpdate

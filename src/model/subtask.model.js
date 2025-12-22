@@ -8,7 +8,7 @@ const subtaskSchema = new mongoose.Schema({
     workType: {type: String, required: true},
     status: {type: String, required: true, default:'Todo'},
     summary: {type:String, required: true},
-    description: {type: String, required: true},
+    description: {type: String, required: false},
     createdBy: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},
     priority: {type: String, required: false, default: 'Medium'},
     startDate: {type: String, required: false},
@@ -16,7 +16,7 @@ const subtaskSchema = new mongoose.Schema({
     dueDate: {type: String, required: false},
     assignedTo: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},
     reporter: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},
-    taskId: {type: mongoose.Schema.Types.ObjectId, ref: 'task'},
+    taskId: {type: mongoose.Schema.Types.ObjectId, ref: 'task', required: true},
     userId: {type: mongoose.Schema.Types.ObjectId, ref: 'user'},
     workLogs: [workLogSchema]
 }

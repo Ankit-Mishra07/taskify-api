@@ -91,7 +91,8 @@ const getSingleUserTaskLists = async (req, res) => {
 
 const getOneTask = async (req, res) => {
     try {
-        const tasks = await TaskSchema.findById(req.params.id).populate(["assignedTo", "reporter", "createdBy", "userId"], ['-password', '-createdAt', '-updatedAt'])
+        const tasks = await TaskSchema.findById(req.params.id).populate(["assignedTo", "reporter", "createdBy", "userId"], ['-password', '-createdAt', '-updatedAt']).populate({path: 'subTasks.assignedTo', select: 'userName email role employee_id'})
+        .populate({path: 'subTasks.reporter', select: 'userName email role employee_id'}).populate({path: 'subTasks.createdBy', select: 'userName email role employee_id'})
         return res.status(200).json({
             success: true, message: 'Task Fetched Successfully', 
             data: tasks
