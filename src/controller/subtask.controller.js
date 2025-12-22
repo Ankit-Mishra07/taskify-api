@@ -26,7 +26,7 @@ const createSubtask = async (req, res) => {
                 workLogs: [],
 
             });
-            parentTask.subTasks = [...parentTask.subTasks, subtaskCreate]
+            parentTask.subTasks = parentTask.subTasks.concat(subtaskCreate);
             await TaskSchema.findByIdAndUpdate(req.params.taskId, parentTask, {new: true, runValidators:true});
 
             return res.status(200).json({

@@ -28,7 +28,8 @@ const createUser = async (req, res) => {
             password: req.body.password,
             isAdmin: req.body.isAdmin,
             isSuperAdmin: req.body.isSuperAdmin,
-            employee_id: req.body.employee_id
+            employee_id: req.body.employee_id,
+            role: req.body.role
         })
         return res.status(200).json({
             success:true, message: 'User created successfully',
@@ -88,7 +89,8 @@ const loginUser = async (req, res) => {
             email:user.email,
             isAdmin: user.isAdmin,
             isSuperAdmin:user.isSuperAdmin,
-            employee_id: user.employee_id
+            employee_id: user.employee_id,
+            role: user.role,
         }, 'secret', {
             expiresIn: "1000h"
         });

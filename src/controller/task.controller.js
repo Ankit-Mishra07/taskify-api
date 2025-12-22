@@ -91,7 +91,7 @@ const getSingleUserTaskLists = async (req, res) => {
 
 const getOneTask = async (req, res) => {
     try {
-        const tasks = await TaskSchema.findById(req.params.id).populate(["assignedTo", "reporter", "createdBy"], ['-password', '-createdAt', '-updatedAt'])
+        const tasks = await TaskSchema.findById(req.params.id).populate(["assignedTo", "reporter", "createdBy", "userId"], ['-password', '-createdAt', '-updatedAt'])
         return res.status(200).json({
             success: true, message: 'Task Fetched Successfully', 
             data: tasks
@@ -146,8 +146,8 @@ const getAllTask_SubTaskList = async (req, res) => {
             query.projectName = {$in : filters.projectName.split(',').map(d => d.trim())};
         }
 
-        let taskList = await TaskSchema.find(query);
-        let subTaskList = await SubTaskSchema.find(query);
+        let taskList = await TaskSchema.find(query).populate(["assignedTo", "reporter", "createdBy"], ['-password', '-createdAt', '-updatedAt']);
+        let subTaskList = await SubTaskSchema.find(query).populate(["assignedTo", "reporter", "createdBy"], ['-password', '-createdAt', '-updatedAt']);
         let list = taskList.concat(subTaskList).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         return res.status(200).json({

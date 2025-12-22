@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 
 const isValidDate = (date) => {
-    if(!date && new Date(date) == 'Invalid Date') {
+    if(!date || new Date(date).toString() == 'Invalid Date') {
         return false;
     }else {
         return true;

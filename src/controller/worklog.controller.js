@@ -27,9 +27,9 @@ const createworkLog = async (req, res) => {
         });
         const allWorkLogs = await WorkLogSchema.find({taskId: req.params.taskId}).populate(['taskId', 'userId']);
         const taskWork = {
-            "workLogs": [...allWorkLogs]
+            "workLogs": allWorkLogs
         }
-        await TaskSchema.findByIdAndUpdate(req.params.taskId, taskWork, {new: true, runValidators:true});
+        const updateTask = await TaskSchema.findByIdAndUpdate(req.params.taskId, taskWork, {new: true, runValidators:true});
 
         return res.status(200).json({
             success: true, message: 'Worklog added successfully',

@@ -3,7 +3,7 @@ const { workLogSchema } = require('./worklog.model');
 
 const subtaskSchema = new mongoose.Schema({
     taskType: {type:String, required:false, default: 'SubTask'},
-    taskUniqueId: {type:String, required:true, unique: true},
+    taskUniqueId: {type:String, required:false},
     projectName: {type: String, required: true},
     workType: {type: String, required: true},
     status: {type: String, required: true, default:'Todo'},
@@ -25,6 +25,16 @@ const subtaskSchema = new mongoose.Schema({
     versionKey:false
 }
 )
+
+subtaskSchema.index(
+  { taskUniqueId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      taskUniqueId: { $exists: true, $ne: null }
+    }
+  }
+);
 
 const SubTaskSchema = mongoose.model('subtasks', subtaskSchema)
 
