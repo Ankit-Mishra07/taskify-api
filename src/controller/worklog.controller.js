@@ -1,4 +1,4 @@
-const { trusted } = require("mongoose");
+const mongoose = require("mongoose");
 const TaskSchema = require("../model/task.model");
 const { WorkLogSchema } = require("../model/worklog.model")
 const { isValidDate } = require("../utils/common");
@@ -116,6 +116,92 @@ const getAllWorkLogForSingleUser = async (req, res) => {
     }
 }
 
+const getFilteredWorkLog = async (req, res) => {
+  try {
+    const { userId, fromDate, toDate } = req.query;
+
+    const startDate = new Date(fromDate);
+    startDate.setHours(0, 0, 0, 0);
+
+    const endDate = new Date(toDate);
+    endDate.setHours(23, 59, 59, 999);
+
+    const worklogs = await WorkLogSchema.aggregate([
+      {
+        $match: {
+          userId: new mongoose.Types.ObjectId(userId),
+          dateTime: {
+            $gte: startDate,
+            $lte: endDate
+          }
+        }
+      },
+
+{
+  $lookup: {
+    from: "tasks",
+    let: { taskId: "$taskId" },
+    pipeline: [
+      {
+        $match: {
+          $expr: { $eq: ["$_id", "$$taskId"] }
+        }
+      },
+      {
+        $unionWith: {
+          coll: "subtasks",
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$_id", "$$taskId"] }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    as: "task"
+  }
+},
+
+      {
+        $unwind: {
+          path: '$task',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+
+
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$dateTime" }
+          },
+          totalTimeSpent: { $sum: "$timeSpent" },
+          logs: { $push: "$$ROOT" }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Worklog fetched successfully',
+      data: worklogs
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong',
+      errorMessage: error.message
+    });
+  }
+};
+
+
 const deleteWorkLog = async (req, res) => {
     try {
         const worklog = await WorkLogSchema.findByIdAndDelete(req.params.id);
@@ -154,4 +240,4 @@ const deleteWorkLog = async (req, res) => {
     }
 }
 
-module.exports = {createworkLog, updateWorkLog, getAllWorkLogForSingleUser, deleteWorkLog}
+module.exports = {createworkLog, updateWorkLog, getAllWorkLogForSingleUser, deleteWorkLog, getFilteredWorkLog}
