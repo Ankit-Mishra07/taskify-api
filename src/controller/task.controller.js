@@ -169,4 +169,31 @@ const getAllTask_SubTaskList = async (req, res) => {
     }
 }
 
-module.exports = {createTask, getAllTasksList, updateTask, getOneTask, deleteOneTask, getSingleUserTaskLists, getAllTask_SubTaskList};
+const searchTaskByText = async (req, res) => {
+    try {
+        const search = req.query.search;
+        let taskList = await TaskSchema.find({$or: [
+            {summary : {$regex: search, $options: 'i'}},
+            {taskUniqueId : {$regex: search, $options: 'i'}},
+        ]}).limit(5).sort({createdAt: -1});
+        let subtaskList = await SubTaskSchema.find({$or: [
+            {summary : {$regex: search, $options: 'i'}},
+            {taskUniqueId : {$regex: search, $options: 'i'}},
+        ]}).limit(5).sort({createdAt: -1});
+        taskList = taskList.concat(subtaskList);
+
+        return res.status(200).json({
+            success: true, message: 'Task fetched Successfully',
+            data: taskList
+        })
+
+    }catch(error) {
+        return res.status(500).json({
+            success: false, message: 'Something went wrong',
+            errorMessage: error,
+        })         
+    }
+}
+
+
+module.exports = {createTask, getAllTasksList, updateTask, getOneTask, deleteOneTask, getSingleUserTaskLists, getAllTask_SubTaskList, searchTaskByText};

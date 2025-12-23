@@ -62,7 +62,7 @@ const updateUser = async (req, res) => {
 
 const getAllUserList = async (req, res) => {
     try {
-        const users = await UserSchema.find({}).select('-password');
+        const users = await UserSchema.find({});
         return res.status(200).json({
             success:true, message: 'Users fetched successfully',
             data: users
