@@ -93,6 +93,11 @@ const getOneTask = async (req, res) => {
     try {
         const tasks = await TaskSchema.findById(req.params.id).populate(["assignedTo", "reporter", "createdBy", "userId"], ['-password', '-createdAt', '-updatedAt']).populate({path: 'subTasks.assignedTo', select: 'userName email role employee_id'})
         .populate({path: 'subTasks.reporter', select: 'userName email role employee_id'}).populate({path: 'subTasks.createdBy', select: 'userName email role employee_id'})
+        .populate({path:'workLogs.userId', select: 'userName email role employee_id' });
+        if (tasks && tasks.workLogs && tasks.workLogs.length) {
+            tasks.workLogs = tasks.workLogs.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
+            console.log(tasks.workLogs)
+        }
         return res.status(200).json({
             success: true, message: 'Task Fetched Successfully', 
             data: tasks

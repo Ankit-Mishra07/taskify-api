@@ -10,13 +10,17 @@ const createworkLog = async (req, res) => {
             return res.status(401).json({
             success: false, message: 'Invalid Date & Time',
             })
+        }        
+        let taskTypeExists = 'parenttask';
+        let isTaskExist = await TaskSchema.findById(req.params.taskId);
+        if(!isTaskExist) {
+            taskTypeExists = 'subtask';
+            isTaskExist = await SubTaskSchema.findById(req.params.taskId)
         }
-
-        const isTaskExist = await TaskSchema.findById(req.params.taskId);
         if(!isTaskExist) {
             return res.status(200).json({
                 success: false, message: 'Task does not exist',
-            })    
+            });   
         }
         const workLog = await WorkLogSchema.create({
             dateTime: req.body.dateTime,
@@ -25,11 +29,15 @@ const createworkLog = async (req, res) => {
             taskId: req.params.taskId,
             timeSpent: req.body.timeSpent
         });
-        const allWorkLogs = await WorkLogSchema.find({taskId: req.params.taskId}).populate(['taskId', 'userId']);
+        const allWorkLogs = await WorkLogSchema.find({taskId: req.params.taskId});
         const taskWork = {
             "workLogs": allWorkLogs
         }
-        const updateTask = await TaskSchema.findByIdAndUpdate(req.params.taskId, taskWork, {new: true, runValidators:true});
+        if(taskTypeExists === 'parenttask') {
+            await TaskSchema.findByIdAndUpdate(req.params.taskId, taskWork, {new: true, runValidators:true});
+        }else if(taskTypeExists === 'subtask') {
+            await SubTaskSchema.findByIdAndUpdate(req.params.taskId, taskWork, {new: true, runValidators:true});
+        }
 
         return res.status(200).json({
             success: true, message: 'Worklog added successfully',
@@ -58,6 +66,7 @@ const updateWorkLog = async (req, res) => {
             taskTypeExists = 'subtask';
             isTaskExist = await SubTaskSchema.findById(findCurrentLog.taskId)
         }
+        console.log(taskTypeExists)
         if(!isTaskExist) {
             return res.status(200).json({
                 success: false, message: 'Task does not exist',
@@ -65,15 +74,17 @@ const updateWorkLog = async (req, res) => {
         }
 
         const workLogUpdate = await WorkLogSchema.findByIdAndUpdate(req.params.worklogId, req.body, {new:true, runValidators:true});
-        isTaskExist.workLogs.forEach(v=> {
-            if(v._id == workLogUpdate._id) {
-                v = {...workLogUpdate}
-            }
+        isTaskExist.workLogs = isTaskExist.workLogs.map((v) => {
+            return v._id.toString() === workLogUpdate._id.toString() ? workLogUpdate : v;
         })
+        let UpdatedworklogValue = {
+            "workLogs": isTaskExist.workLogs
+        }
+        console.log(isTaskExist.workLogs)
         if(taskTypeExists == 'parenttask') {
-            await TaskSchema.findByIdAndUpdate(req.params.taskId, isTaskExist, {new: true, runValidators:true});
+            await TaskSchema.findByIdAndUpdate(findCurrentLog.taskId, UpdatedworklogValue, {new: true, runValidators:true});
         }else if(taskTypeExists == 'subtask') {
-            await SubTaskSchema.findByIdAndUpdate(req.params.taskId, isTaskExist, {new: true, runValidators:true}); 
+            await SubTaskSchema.findByIdAndUpdate(findCurrentLog.taskId, UpdatedworklogValue, {new: true, runValidators:true}); 
         }
         const allWorkLogs = await WorkLogSchema.find({taskId: findCurrentLog.taskId}).populate(['taskId', 'userId']);
         return res.status(200).json({
@@ -123,15 +134,15 @@ const deleteWorkLog = async (req, res) => {
             });  
         }
 
-        isTaskExist.workLogs = isTaskExist.workLogs.filter(v => v._id !== req.params.id);
+        isTaskExist.workLogs = isTaskExist.workLogs.filter(v => v._id.toString() !== req.params.id.toString());
 
         if(taskTypeExists == 'parenttask') {
-            await TaskSchema.findByIdAndUpdate(req.params.taskId, isTaskExist, {new: true, runValidators:true});
+            await TaskSchema.findByIdAndUpdate(worklog.taskId, isTaskExist, {new: true, runValidators:true});
         }else if(taskTypeExists == 'subtask') {
-            await SubTaskSchema.findByIdAndUpdate(req.params.taskId, isTaskExist, {new: true, runValidators:true}); 
+            await SubTaskSchema.findByIdAndUpdate(worklog.taskId, isTaskExist, {new: true, runValidators:true}); 
         }
-        return res.status(500).json({
-            success: false, message: 'Work Log Deleted Successfully',
+        return res.status(200).json({
+            success: true, message: 'Work Log Deleted Successfully',
         }); 
         
 

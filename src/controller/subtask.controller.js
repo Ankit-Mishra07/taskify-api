@@ -74,6 +74,10 @@ const updateSubtask = async (req, res) => {
 const getOneSubTask = async (req, res) => {
     try {
         const subTask = await SubTaskSchema.findById(req.params.id).populate(["assignedTo", "reporter", "createdBy"], ['-password', '-createdAt', '-updatedAt'])
+        .populate({path:'workLogs.userId', select: 'userName email role employee_id' })
+        if (subTask && subTask.workLogs && subTask.workLogs.length) {
+            subTask.workLogs = subTask.workLogs.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
+        }
         return res.status(200).json({
             success: true, message: 'Task Fetched Successfully', 
             data: subTask
